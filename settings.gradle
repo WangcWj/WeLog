@@ -1,0 +1,4 @@
+
+include ':welog'
+include ':app'
+rootProject.name = "WeLog"
