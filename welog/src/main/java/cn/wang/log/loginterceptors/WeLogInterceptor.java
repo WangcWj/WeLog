@@ -12,7 +12,7 @@ public interface WeLogInterceptor {
 
     LogMsg println(Chain chain) throws Exception;
 
-    void close(Chain chain) ;
+    void close() ;
 
     interface Chain{
 

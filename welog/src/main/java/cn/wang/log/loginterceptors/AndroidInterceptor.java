@@ -19,6 +19,9 @@ public class AndroidInterceptor implements WeLogInterceptor {
         LogMsg process = null;
         //捕获后续链路中的异常信息，将异常信息打印出来，如有特殊需求，可以根据抛出异常的类型来详细区分。
         try {
+            if ((target.printMode & LogConfig.CLOSE) != 0) {
+                return chain.process(target);
+            }
             if (target.printMode >= 0 && (target.printMode & LogConfig.PRINT_LOGCAT) != 0) {
                 Log.println(target.level, target.tag, target.message);
             }
@@ -33,7 +36,7 @@ public class AndroidInterceptor implements WeLogInterceptor {
     }
 
     @Override
-    public void close(Chain chain) {
+    public void close() {
 
     }
 }

@@ -11,13 +11,11 @@ import cn.wang.log.core.LogMsg;
 public class EndOfInterceptor implements WeLogInterceptor {
     @Override
     public LogMsg println(Chain chain) {
-        LogMsg target = chain.target();
-        target.resetMessage(target.message+"\n");
-        return target;
+        return chain.target();
     }
 
     @Override
-    public void close(Chain chain) {
+    public void close() {
 
     }
 }

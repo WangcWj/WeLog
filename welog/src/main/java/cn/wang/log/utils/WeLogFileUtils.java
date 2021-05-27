@@ -5,12 +5,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * Created to :
+ * Created to : 文件工具类。
  *
  * @author cc.wang
  * @date 2021/5/12
  */
 public class WeLogFileUtils {
+
+    public static final String FUFFIX = "$$V";
 
     public static final SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -104,6 +106,21 @@ public class WeLogFileUtils {
     public static boolean fileIsExist(String filePath) {
         File file = new File(filePath);
         return file.exists();
+    }
+
+    public static int getFileSuffix(String name) {
+        if (name.contains(FUFFIX)) {
+            int index = name.indexOf(FUFFIX);
+            try {
+                String substring = name.substring(index + FUFFIX.length());
+                return Integer.parseInt(substring);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            return 0;
+        }
+        return 0;
     }
 
 }

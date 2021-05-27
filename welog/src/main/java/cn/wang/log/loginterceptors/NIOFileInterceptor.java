@@ -1,15 +1,17 @@
 package cn.wang.log.loginterceptors;
 
 import android.text.TextUtils;
+import android.util.Log;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.MappedByteBuffer;
 
 import cn.wang.log.config.LogConfig;
-import cn.wang.log.core.LogMsg;
 import cn.wang.log.core.LogCenter;
-import cn.wang.log.exceptions.LogFileException;
+import cn.wang.log.core.LogMsg;
+import cn.wang.log.exceptions.OpenFileException;
+import cn.wang.log.utils.WeLogFileUtils;
+import cn.wang.niolib.NioUtils;
 
 /**
  * Created to : 如果当前的日志需要输入到文件中，则写入文件。
@@ -18,74 +20,34 @@ import cn.wang.log.exceptions.LogFileException;
  * @author cc.wang
  * @date 2021/5/10
  */
-public class WriterFileInterceptor implements WeLogInterceptor {
+public class NIOFileInterceptor implements WeLogInterceptor {
 
-    private LogCenter log;
     private boolean mIsFinish;
-    private BufferedWriter bufferedWriter;
+    private MappedByteBuffer bufferedWriter;
 
-    public WriterFileInterceptor() {
+    public NIOFileInterceptor() {
         mIsFinish = false;
     }
 
     @Override
     public LogMsg println(Chain chain) throws Exception {
         LogMsg target = chain.target();
-        log = target.log;
         if (mIsFinish) {
+            return chain.process(target);
+        }
+        if ((target.printMode & LogConfig.CLOSE) != 0) {
+            close();
             return chain.process(target);
         }
         if (target.printMode >= 0 && (target.printMode & LogConfig.PRINT_FILE) == 0) {
             return chain.process(target);
         }
-        createFileBuffer(target);
+        openFileMap(target);
         //写入缓存
-        bufferedWriter.write(target.message);
-        bufferedWriter.flush();
+        bufferedWriter.put(target.message.getBytes());
         return chain.process(target);
     }
 
-    @Override
-    public void close(Chain chain) {
-        mIsFinish = true;
-        closeBuffer();
-    }
-
-    private void closeBuffer() {
-        if (bufferedWriter != null) {
-            try {
-                bufferedWriter.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        bufferedWriter = null;
-    }
-
-    /**
-     * 使用一般的IO流形式来操作日志文件。
-     *
-     * @throws IOException
-     */
-    private void createFileBuffer(LogMsg msg) throws IOException {
-        if (null == bufferedWriter) {
-            if (TextUtils.isEmpty(log.getLogFilePath()) || log.getLogFileSize() <= 0) {
-                throw new IllegalArgumentException("Please check that the file parameters are incorrect! file path "
-                        + log.getLogFilePath() + "  file size  " + log.getLogFileSize());
-            }
-            if (null == msg.logFile) {
-                throw new LogFileException("What ? The logfile is null !");
-            }
-            bufferedWriter = new BufferedWriter(new FileWriter(msg.logFile, true));
-        } else {
-            if (msg.logFileIsChange) {
-                closeBuffer();
-                msg.logFileChange(false);
-                createFileBuffer(msg);
-            }
-        }
-
-    }
 
     /**
      * c++中的mmap()函数是吧一个文件或者是一块内存区对象映射到调用方法的用户进程的地址空间中。
@@ -120,8 +82,61 @@ public class WriterFileInterceptor implements WeLogInterceptor {
      * @throws IllegalArgumentException
      * @throws IOException
      */
-    private void openFileMap() throws IllegalArgumentException, IOException {
+    public void openFileMap(LogMsg msg) {
+        if (null == bufferedWriter) {
+            bufferedWriter = NioUtils.create(msg.logFile.getAbsolutePath(), msg.log.getLogFileSize());
+            if (null == bufferedWriter) {
+                throw new OpenFileException("Nio: Failed to open mapped file");
+            }
+            //追加写入文件。
+            int index = 0;
+            while (bufferedWriter.get(index) != 0) {
+                index++;
+            }
+            //当文件内容的大小跟限制文件的大小之间相差5k的话，就重新创建新文件。
+            if (checkFileSize(msg, index)) {
+                createNewFile(msg);
+                return;
+            }
+            bufferedWriter.position(index);
+        } else {
+            if (msg.logFileIsChange) {
+                //重新映射。
+                closeBuffer();
+                msg.logFileIsChange = false;
+                openFileMap(msg);
+            } else if (checkFileSize(msg, bufferedWriter.position())) {
+                createNewFile(msg);
+            }
+        }
     }
 
+    private void createNewFile(LogMsg msg) {
+        msg.logFileChange(true);
+        String newName = msg.logFile.getName();
+        int fileSuffix = WeLogFileUtils.getFileSuffix(newName);
+        if (newName.contains(WeLogFileUtils.FUFFIX)) {
+            newName = newName.substring(0, newName.indexOf(WeLogFileUtils.FUFFIX));
+        }
+        msg.resetLogFile(WeLogFileUtils.createCopyFile(msg.logFile, TextUtils.concat(newName + WeLogFileUtils.FUFFIX + (fileSuffix + 1)).toString()));
+        openFileMap(msg);
+    }
 
+    private boolean checkFileSize(LogMsg msg, int position) {
+        Log.e("cc.wang", "IOFileInterceptor.openFileMap.index  " + position+" size   is   "+(msg.log.getLogFileSize() - LogConfig.K_5));
+        return position >= msg.log.getLogFileSize() - LogConfig.K_5;
+    }
+
+    @Override
+    public void close() {
+        mIsFinish = true;
+        closeBuffer();
+    }
+
+    private void closeBuffer() {
+        if (bufferedWriter != null) {
+            NioUtils.clean(bufferedWriter);
+        }
+        bufferedWriter = null;
+    }
 }

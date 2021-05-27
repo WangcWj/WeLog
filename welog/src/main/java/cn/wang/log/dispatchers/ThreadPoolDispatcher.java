@@ -1,14 +1,13 @@
 package cn.wang.log.dispatchers;
 
 import android.util.Log;
-
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import cn.wang.log.config.LogConfig;
 import cn.wang.log.core.LogMsg;
+import cn.wang.log.utils.WeLogThreadUtils;
 
 /**
  * Created to : 采用线程池+LinkedBlockingDeque的形式来处理任务。
@@ -44,20 +43,10 @@ public class ThreadPoolDispatcher implements Dispatcher {
     public synchronized ExecutorService executorService() {
         if (executorService == null) {
             executorService = new ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS,
-                    new LinkedBlockingDeque<Runnable>(), threadFactory("WeLog Thread:", false));
+                    new LinkedBlockingDeque<Runnable>(), WeLogThreadUtils.threadFactory("WeLog Thread:", false));
         }
         return executorService;
     }
 
-    public ThreadFactory threadFactory(final String name, final boolean daemon) {
-        return new ThreadFactory() {
-            @Override
-            public Thread newThread(Runnable runnable) {
-                Thread result = new Thread(runnable, name);
-                result.setDaemon(daemon);
-                return result;
-            }
-        };
-    }
 
 }

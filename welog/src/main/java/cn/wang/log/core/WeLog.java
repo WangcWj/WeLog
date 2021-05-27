@@ -25,7 +25,7 @@ public class WeLog {
     private WeLog() {
     }
 
-    public static void init(LogCenter.Builder builder) {
+    public static synchronized void init(LogCenter.Builder builder) {
         if (initialized) {
             return;
         }
@@ -34,12 +34,6 @@ public class WeLog {
             initialized = true;
         } catch (Exception e) {
             initialized = false;
-        }
-    }
-
-    public static void unInit(){
-        if(log != null){
-            log.close();
         }
     }
 
@@ -68,7 +62,7 @@ public class WeLog {
         log.ew(msg);
     }
 
-    public static void assertInitialization(String msg) {
+    public static void assertInitialization(Object msg) {
         if (!initialized) {
             throw new IllegalStateException("请先调用WeLog.init()方法！");
         }

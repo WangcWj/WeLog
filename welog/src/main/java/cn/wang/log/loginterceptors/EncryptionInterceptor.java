@@ -1,5 +1,6 @@
 package cn.wang.log.loginterceptors;
 
+import cn.wang.log.config.LogConfig;
 import cn.wang.log.core.LogMsg;
 
 /**
@@ -15,12 +16,15 @@ public class EncryptionInterceptor implements WeLogInterceptor {
     @Override
     public LogMsg println(Chain chain) throws Exception{
         LogMsg target = chain.target();
+        if ((target.printMode & LogConfig.CLOSE) != 0) {
+            return chain.process(target);
+        }
         target.resetMessage(target.message+"\n");
         return chain.process(target);
     }
 
     @Override
-    public void close(Chain chain) {
+    public void close() {
 
     }
 }

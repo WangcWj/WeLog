@@ -3,6 +3,7 @@
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel>
       <module name="javalib" target="1.7" />
+      <module name="niolib" target="1.7" />
     </bytecodeTargetLevel>
   </component>
 </project>

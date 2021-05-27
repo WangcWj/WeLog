@@ -2,9 +2,12 @@ package cn.wang.log.loginterceptors;
 
 import android.os.StatFs;
 import android.text.TextUtils;
+import android.util.Log;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Date;
+
 import cn.wang.log.config.LogConfig;
 import cn.wang.log.core.LogMsg;
 import cn.wang.log.utils.WeLogFileUtils;
@@ -30,14 +33,18 @@ import cn.wang.log.utils.WeLogFileUtils;
 public class FileConfigurationInterceptor implements WeLogInterceptor {
 
     private File targetLogFile;
-    private static final String FUFFIX = "$$V";
-
-    public FileConfigurationInterceptor() {
-    }
+    private boolean mIsFinish;
 
     @Override
     public LogMsg println(Chain chain) throws Exception {
         LogMsg target = chain.target();
+        if (mIsFinish) {
+            return chain.process(target);
+        }
+        if ((target.printMode & LogConfig.CLOSE) != 0) {
+            close();
+            return chain.process(target);
+        }
         //检查SDCard可用内存空间。
         //第一次执行，可能为null，此时有两种情况。
         if (targetLogFile == null) {
@@ -49,7 +56,7 @@ public class FileConfigurationInterceptor implements WeLogInterceptor {
                     targetLogFile = lastModifyFile;
                 }
                 //只在应用进程启动的时候检查一次日志是否需要删除
-                WeLogFileUtils.checkCanDeleteFile(logFile,target.log.getDeleteDay());
+                WeLogFileUtils.checkCanDeleteFile(logFile, target.log.getDeleteDay());
             }
         }
         //没有找到历史日志文件。
@@ -68,19 +75,30 @@ public class FileConfigurationInterceptor implements WeLogInterceptor {
         if (targetLogFile == null) {
             throw new FileNotFoundException("FileConfigurationInterceptor: File creation failed,new targetLogFile is null !");
         }
+        //对NIO方式写文件的话，这边就要稍微的处理一下逻辑了。
         //这里其实日志文件有可能超过固定的大小，可能上一次写入的数据大小刚好比logFileSize大一点。
-        if (targetLogFile.length() >= target.log.getLogFileSize()) {
-            int fileSuffix = getFileSuffix(targetLogFile.getName());
-            String newName = targetLogFile.getName();
-            if (targetLogFile.getName().contains(FUFFIX)) {
-                newName = newName.substring(0, targetLogFile.getName().indexOf(FUFFIX));
+        //NIO 由于是采用的内存映射文件，所以不能提前获取文件的大小。
+        if (target.log.getIoType() == LogConfig.IO) {
+            if (targetLogFile.length() >= target.log.getLogFileSize()) {
+                int fileSuffix = WeLogFileUtils.getFileSuffix(targetLogFile.getName());
+                String newName = targetLogFile.getName();
+                if (targetLogFile.getName().contains(WeLogFileUtils.FUFFIX)) {
+                    newName = newName.substring(0, targetLogFile.getName().indexOf(WeLogFileUtils.FUFFIX));
+                }
+                targetLogFile = WeLogFileUtils.createCopyFile(targetLogFile, TextUtils.concat(newName + WeLogFileUtils.FUFFIX + (fileSuffix + 1)).toString());
+                target.logFileChange(true);
             }
-            targetLogFile = WeLogFileUtils.createCopyFile(targetLogFile, TextUtils.concat(newName + FUFFIX + (fileSuffix + 1)).toString());
-            target.logFileChange(true);
         }
         //必须重置日志文件，要不然下一步就没办法写日志文件。
         target.resetLogFile(targetLogFile);
         return chain.process(target);
+    }
+
+    @Override
+    public void close() {
+        Log.e("cc.wang", "FileConfigurationInterceptor.close.");
+        mIsFinish = true;
+        targetLogFile = null;
     }
 
     /**
@@ -122,7 +140,7 @@ public class FileConfigurationInterceptor implements WeLogInterceptor {
         if (lastModified <= 0) {
             return false;
         }
-        if (! WeLogFileUtils.sDateFormat.format(currentTimeMillis).equals( WeLogFileUtils.sDateFormat.format(lastModified)) && currentTimeMillis > lastModified) {
+        if (!WeLogFileUtils.sDateFormat.format(currentTimeMillis).equals(WeLogFileUtils.sDateFormat.format(lastModified)) && currentTimeMillis > lastModified) {
             return true;
         }
         return false;
@@ -134,27 +152,7 @@ public class FileConfigurationInterceptor implements WeLogInterceptor {
      * @return
      */
     private String generaFileName() {
-        return  WeLogFileUtils.sDateFormat.format(new Date());
-    }
-
-    private int getFileSuffix(String name) {
-        if (name.contains(FUFFIX)) {
-            int index = name.indexOf(FUFFIX);
-            try {
-                String substring = name.substring(index + FUFFIX.length());
-                return Integer.parseInt(substring);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } else {
-            return 0;
-        }
-        return 0;
-    }
-
-    @Override
-    public void close(Chain chain) {
-        targetLogFile = null;
+        return WeLogFileUtils.sDateFormat.format(new Date());
     }
 
 }

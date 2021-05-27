@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 
 import java.util.List;
 
+import cn.wang.log.config.LogConfig;
 import cn.wang.log.core.LogMsg;
 
 /**
@@ -31,6 +32,11 @@ public class RealInterceptorChain implements WeLogInterceptor.Chain {
     }
 
     @Override
+    public LogMsg target() {
+        return target;
+    }
+
+    @Override
     public LogMsg process(LogMsg msg) throws Exception {
         target = msg;
         if (index >= weLogInterceptors.size()) {
@@ -41,8 +47,8 @@ public class RealInterceptorChain implements WeLogInterceptor.Chain {
         return weLogInterceptor.println(next);
     }
 
-    @Override
-    public LogMsg target() {
-        return target;
+    public LogMsg close() {
+
+        return null;
     }
 }

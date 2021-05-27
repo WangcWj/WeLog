@@ -1,9 +1,12 @@
 package cn.wang.log.loginterceptors;
 
+import android.annotation.SuppressLint;
 import android.os.Process;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import cn.wang.log.config.LogConfig;
 import cn.wang.log.core.LogMsg;
 
 /**
@@ -15,11 +18,16 @@ import cn.wang.log.core.LogMsg;
  * @date 2021/5/10
  */
 public class FormatLogMessageInterceptor implements WeLogInterceptor {
+    @SuppressLint("SimpleDateFormat")
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 
     @Override
     public LogMsg println(Chain chain) throws Exception{
         LogMsg target = chain.target();
+        if ((target.printMode & LogConfig.CLOSE) != 0) {
+            close();
+            return chain.process(target);
+        }
         StringBuilder sb = new StringBuilder();
         String format = dateFormat.format(new Date());
         sb.append(format)
@@ -38,7 +46,7 @@ public class FormatLogMessageInterceptor implements WeLogInterceptor {
     }
 
     @Override
-    public void close(Chain chain) {
+    public void close() {
 
     }
 }
