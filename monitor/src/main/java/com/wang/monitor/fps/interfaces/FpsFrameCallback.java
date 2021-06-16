@@ -1,4 +1,4 @@
-package cn.wang.welog.fps.interfaces;
+package com.wang.monitor.fps.interfaces;
 
 /**
  * Created to :

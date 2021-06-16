@@ -1,9 +1,9 @@
-package cn.wang.welog.fps.core;
+package com.wang.monitor.fps.core;
 
 import android.util.Log;
 import android.view.Choreographer;
 import java.lang.reflect.Method;
-import cn.wang.welog.fps.utils.ReflectUtils;
+import com.wang.monitor.fps.utils.ReflectUtils;
 
 /**
  * Created to :

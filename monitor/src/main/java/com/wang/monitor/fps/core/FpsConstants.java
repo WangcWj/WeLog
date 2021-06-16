@@ -1,4 +1,4 @@
-package cn.wang.welog.fps.core;
+package com.wang.monitor.fps.core;
 
 /**
  * Created to :
@@ -15,9 +15,11 @@ public class FpsConstants {
     public static final String LOOPER_LOGGING = "mLogging";
     public static final String LOOPER_START = ">>";
     public static final String LOOPER_END = "<<";
+    public static final String SEPARATOR = "\r\n";
 
 
     public static final long DEFAULT_FRAME_DURATION = 16666667L;
+    public static final int DEFAULT_BLOCK_THRESHOLD_MILLIS = 3000;
 
     /**
      * Callback type: Input callback.  Runs first.

@@ -40,6 +40,11 @@ public class CusViewTwo extends AppCompatTextView {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         Log.e("cc.wang","CusViewTwo.onDraw.");
     }
 }

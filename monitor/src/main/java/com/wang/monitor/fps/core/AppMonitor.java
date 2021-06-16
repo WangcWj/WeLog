@@ -1,13 +1,12 @@
-package cn.wang.welog.fps.core;
+package com.wang.monitor.fps.core;
 
-import android.os.Build;
 import android.os.Looper;
-import android.os.MessageQueue;
-import android.util.Log;
 import java.lang.reflect.Method;
-import cn.wang.welog.fps.interfaces.FpsFrameCallback;
-import cn.wang.welog.fps.monitors.FpsFramesMonitor;
-import cn.wang.welog.fps.monitors.LooperMonitor;
+import com.wang.monitor.fps.interfaces.FpsFrameCallback;
+import com.wang.monitor.fps.monitors.FpsFramesMonitor;
+import com.wang.monitor.fps.monitors.LooperMonitor;
+import com.wang.monitor.fps.monitors.MainThreadBlockMonitor;
+import cn.wang.log.core.WeLog;
 
 /**
  * Created to :
@@ -15,18 +14,18 @@ import cn.wang.welog.fps.monitors.LooperMonitor;
  * @author WANG
  * @date 2021/6/10
  */
-public class FPSFrame implements Runnable {
+public class AppMonitor implements Runnable {
 
-    private FPSFrame() {
+    private AppMonitor() {
 
     }
 
     private static class Instance {
-        private static FPSFrame fpsFrame = new FPSFrame();
+        private static AppMonitor appMonitor = new AppMonitor();
     }
 
-    public static FPSFrame getInstance() {
-        return Instance.fpsFrame;
+    public static AppMonitor getInstance() {
+        return Instance.appMonitor;
     }
 
     private ReflectChoreographer mReChoreographer;
@@ -48,6 +47,7 @@ public class FPSFrame implements Runnable {
         mLoopMonitor = new LooperMonitor();
         mLoopMonitor.init(Looper.getMainLooper());
         mFpsFrameCallback = new FpsFramesMonitor();
+        mLoopMonitor.addLoopListener(new MainThreadBlockMonitor(1000,50));
         mLoopMonitor.addLoopListener(new LooperMonitor.LooperCallback() {
 
             @Override
@@ -69,6 +69,7 @@ public class FPSFrame implements Runnable {
         if (!mHaveInit) {
             return;
         }
+        WeLog.d("AppMonitor-> onStart");
         addFrameCallback(FpsConstants.CALLBACK_TRAVERSAL, this);
     }
 
@@ -89,7 +90,7 @@ public class FPSFrame implements Runnable {
     private void loopEnd() {
         long endTime = System.nanoTime();
         if (isVSyncFrame) {
-            Log.e("WANG", "FPSFrame.loopEnd");
+            WeLog.d("AppMonitor-> loopEnd");
             addFrameCallback(FpsConstants.CALLBACK_TRAVERSAL, this);
             if (null != mFpsFrameCallback) {
                 mFpsFrameCallback.doFrame(endTime, mReChoreographer.getIntendedFrameTimeNs(mLooperStartTime), mReChoreographer.frameIntervalNanos);
@@ -110,7 +111,7 @@ public class FPSFrame implements Runnable {
                 }
             }
         } catch (Exception e) {
-            Log.e("WANG", "FPSFrame.addFrameCallback" + e);
+            WeLog.e("AppMonitor.addFrameCallback" + e);
         }
     }
 

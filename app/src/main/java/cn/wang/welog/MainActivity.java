@@ -5,24 +5,19 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
-import android.animation.ObjectAnimator;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Choreographer;
-import android.view.Display;
 import android.view.View;
 import android.view.ViewTreeObserver;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import com.wang.monitor.fps.core.AppMonitor;
+import com.wang.monitor.startup.ViewServer;
+
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import cn.wang.log.core.WeLog;
 import cn.wang.log.loginterceptors.IOFileInterceptor;
-import cn.wang.welog.startup.ViewServer;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -38,9 +33,8 @@ public class MainActivity extends AppCompatActivity {
         createActivityTime = System.currentTimeMillis();
         r.put(getClass().getSimpleName(),true);
         super.onCreate(savedInstanceState);
-        ViewServer.get(this).addWindow(this);
         setContentView(R.layout.activity_main);
-        getWindow().setBackgroundDrawable(null);
+        AppMonitor.getInstance().onStart();
 
 
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
@@ -54,18 +48,12 @@ public class MainActivity extends AppCompatActivity {
         Log.e("cc.wang","MainActivity.onCreate.厂商 "+android.os.Build.BRAND);
 
 
-        View viewById = findViewById(R.id.cus);
+        View viewById = findViewById(R.id.block);
+        notice = findViewById(R.id.cus);
         viewById.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                view.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-                    @Override
-                    public boolean onPreDraw() {
-
-                        return true;
-                    }
-                });
-                 view.invalidate();
+                notice.setVisibility(View.VISIBLE);
             }
         });
         /*

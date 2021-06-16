@@ -1,7 +1,9 @@
-package cn.wang.welog.fps.monitors;
+package com.wang.monitor.fps.monitors;
 
 import android.util.Log;
-import cn.wang.welog.fps.interfaces.FpsFrameCallback;
+import com.wang.monitor.fps.interfaces.FpsFrameCallback;
+
+import cn.wang.log.core.WeLog;
 
 /**
  * Created to :
@@ -11,17 +13,16 @@ import cn.wang.welog.fps.interfaces.FpsFrameCallback;
  */
 public class FpsFramesMonitor implements FpsFrameCallback {
 
-    private final long skippedFramesThreshold = 30;
+    private final long skippedFramesThreshold = 24;
 
     @Override
     public void doFrame(long endTime, long intendedFrameTimeNs, long frameIntervalNanos) {
         long jitterNanos = endTime - intendedFrameTimeNs;
         if (jitterNanos >= frameIntervalNanos) {
             long skippedFrames = jitterNanos / frameIntervalNanos;
-            Log.e("WANG", "FPSFrame.skippedFrames" + skippedFrames);
+            WeLog.e("AppMonitor.skippedFrames" + skippedFrames);
             if (skippedFrames >= skippedFramesThreshold) {
-                String stackTraceString = Log.getStackTraceString(new Throwable());
-                Log.e("WANG","FpsFramesMonitor.skippedFrames:"+skippedFrames+"  log  is  "+stackTraceString);
+
             }
         }
     }

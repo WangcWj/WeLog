@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package cn.wang.welog.startup;
+package com.wang.monitor.startup;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

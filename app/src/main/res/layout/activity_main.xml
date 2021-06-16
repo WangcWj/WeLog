@@ -8,10 +8,16 @@
     android:background="@android:color/white"
     tools:context=".MainActivity">
 
+    <Button
+        android:id="@+id/block"
+        android:text="bock"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 
     <cn.wang.welog.CusViewTwo
         android:id="@+id/cus"
         android:background="@android:color/darker_gray"
+        android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="200dp" />
 

@@ -1,15 +1,16 @@
-package cn.wang.welog.fps.monitors;
+package com.wang.monitor.fps.monitors;
 
 import android.os.Build;
 import android.os.Looper;
 import android.os.MessageQueue;
+import android.os.SystemClock;
 import android.util.Log;
 import android.util.Printer;
 
 import java.util.HashSet;
 
-import cn.wang.welog.fps.core.FpsConstants;
-import cn.wang.welog.fps.utils.ReflectUtils;
+import com.wang.monitor.fps.core.FpsConstants;
+import com.wang.monitor.fps.utils.ReflectUtils;
 
 /**
  * Created to :
@@ -23,6 +24,7 @@ public class LooperMonitor implements MessageQueue.IdleHandler {
     private InnerPrinter innerPrinter;
     public Looper mainLooper;
     private long lastCheckPrinterTime = 0L;
+    private static final long CHECK_TIME = 60 * 1000L;
 
 
     public void addLoopListener(LooperCallback callback) {
@@ -39,9 +41,19 @@ public class LooperMonitor implements MessageQueue.IdleHandler {
 
     public void init(Looper looper) {
         mainLooper = looper;
+        resetLooperPrinter();
+        //添加IdleHandler避免设置的Printer失效。
+        addIdleHandler();
+    }
+
+    private void resetLooperPrinter() {
+        if (null == mainLooper) {
+            removeIdleHandler();
+            return;
+        }
         Printer orgP = null;
         try {
-            orgP = ReflectUtils.get(looper.getClass(), FpsConstants.LOOPER_LOGGING, looper);
+            orgP = ReflectUtils.get(mainLooper.getClass(), FpsConstants.LOOPER_LOGGING, mainLooper);
             if (null != innerPrinter && orgP == innerPrinter) {
                 return;
             }
@@ -54,18 +66,24 @@ public class LooperMonitor implements MessageQueue.IdleHandler {
         } catch (Exception e) {
             Log.e("WANG", "LooperMonitor.init.Exception " + e);
         }
-        looper.setMessageLogging(innerPrinter = new InnerPrinter(orgP));
-        //添加IdleHandler避免设置的Printer失效。
-        addIdleHandler();
+        mainLooper.setMessageLogging(innerPrinter = new InnerPrinter(orgP));
     }
 
     void dispatchLooperLog(String log) {
         dispatcherToListener(log.startsWith(FpsConstants.LOOPER_START));
     }
 
+    /**
+     * 隔一分钟检查一次Printer是否还正常的工作。
+     *
+     * @return
+     */
     @Override
     public boolean queueIdle() {
-
+        if (SystemClock.uptimeMillis() - lastCheckPrinterTime >= CHECK_TIME) {
+            resetLooperPrinter();
+            lastCheckPrinterTime = SystemClock.uptimeMillis();
+        }
         return true;
     }
 
@@ -146,7 +164,7 @@ public class LooperMonitor implements MessageQueue.IdleHandler {
 
     public abstract static class LooperCallback {
 
-        boolean isLoopStart = false;
+        public boolean isLoopStart = false;
 
         public abstract void dispatchLoopStart();
 
