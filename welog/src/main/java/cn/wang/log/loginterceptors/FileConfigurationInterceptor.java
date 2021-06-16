@@ -3,11 +3,9 @@ package cn.wang.log.loginterceptors;
 import android.os.StatFs;
 import android.text.TextUtils;
 import android.util.Log;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Date;
-
 import cn.wang.log.config.LogConfig;
 import cn.wang.log.core.LogMsg;
 import cn.wang.log.utils.WeLogFileUtils;

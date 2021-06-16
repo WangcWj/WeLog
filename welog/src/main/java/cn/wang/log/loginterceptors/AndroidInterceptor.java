@@ -4,7 +4,6 @@ import android.util.Log;
 import cn.wang.log.config.LogConfig;
 import cn.wang.log.core.LogMsg;
 
-
 /**
  * Created to : 用来输出日志到Logcat。
  *

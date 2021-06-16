@@ -1,6 +1,8 @@
 package cn.wang.welog.fps.core;
 
+import android.os.Build;
 import android.os.Looper;
+import android.os.MessageQueue;
 import android.util.Log;
 import java.lang.reflect.Method;
 import cn.wang.welog.fps.interfaces.FpsFrameCallback;

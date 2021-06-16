@@ -2,10 +2,8 @@ package cn.wang.log.loginterceptors;
 
 import android.annotation.SuppressLint;
 import android.os.Process;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
 import cn.wang.log.config.LogConfig;
 import cn.wang.log.core.LogMsg;
 

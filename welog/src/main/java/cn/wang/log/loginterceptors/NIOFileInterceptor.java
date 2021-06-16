@@ -2,12 +2,9 @@ package cn.wang.log.loginterceptors;
 
 import android.text.TextUtils;
 import android.util.Log;
-
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
-
 import cn.wang.log.config.LogConfig;
-import cn.wang.log.core.LogCenter;
 import cn.wang.log.core.LogMsg;
 import cn.wang.log.exceptions.OpenFileException;
 import cn.wang.log.utils.WeLogFileUtils;

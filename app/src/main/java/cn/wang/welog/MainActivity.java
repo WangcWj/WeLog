@@ -5,29 +5,69 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.animation.ObjectAnimator;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Choreographer;
+import android.view.Display;
 import android.view.View;
+import android.view.ViewTreeObserver;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import cn.wang.log.core.WeLog;
 import cn.wang.log.loginterceptors.IOFileInterceptor;
+import cn.wang.welog.startup.ViewServer;
 
 public class MainActivity extends AppCompatActivity {
 
     View notice;
     IOFileInterceptor IOFileInterceptor = new IOFileInterceptor();
 
+    private long createActivityTime;
+
+    Map<String,Boolean> r = new HashMap<>(2);
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        createActivityTime = System.currentTimeMillis();
+        r.put(getClass().getSimpleName(),true);
         super.onCreate(savedInstanceState);
+        ViewServer.get(this).addWindow(this);
         setContentView(R.layout.activity_main);
+        getWindow().setBackgroundDrawable(null);
 
-        AppApplication.count +=1;
-        notice = findViewById(R.id.notice);
+
+        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+
+
+
+
+        //手机型号
+        Log.e("cc.wang","MainActivity.onCreate.型号 "+android.os.Build.MODEL);
+        //手机厂商
+        Log.e("cc.wang","MainActivity.onCreate.厂商 "+android.os.Build.BRAND);
+
+
+        View viewById = findViewById(R.id.cus);
+        viewById.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                view.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                    @Override
+                    public boolean onPreDraw() {
+
+                        return true;
+                    }
+                });
+                 view.invalidate();
+            }
+        });
         /*
          * 1.采用Builder方式来建造。
          * 2.日志的处理应该采用责任链的模式，可以仿照OkHttp。因为日志信息可能需要要经过很多的步骤，
@@ -56,24 +96,36 @@ public class MainActivity extends AppCompatActivity {
         //WeLog.dw("MainActivity");
         //NIO  184  54 45
         //IO  160 89 72
-        long l = System.currentTimeMillis();
-        for (int j = 0; j < 1000; j++) {
-            WeLog.dw("MainActivity onCreate "+AppApplication.count);
+        WeLog.dw("MainActivity onCreate " + AppApplication.count);
+
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        Boolean aBoolean = r.get(getClass().getSimpleName());
+        if(aBoolean != null && aBoolean){
+            r.remove(getClass().getSimpleName());
+            Log.e("Displayed","MainActivity.onWindowFocusChanged: start time "+(System.currentTimeMillis() - createActivityTime));
         }
-        Log.e("cc.wang","MainActivity.onCreate."+(System.currentTimeMillis() - l));
-
-
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-       // WeLog.dw("MainActivity  onStop");
+        // WeLog.dw("MainActivity  onStop");
     }
 
     @Override
     protected void onDestroy() {
         //WeLog.dw("MainActivity  onDestroy");
         super.onDestroy();
+        ViewServer.get(this).removeWindow(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        ViewServer.get(this).setFocusedWindow(this);
     }
 }

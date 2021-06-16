@@ -1,10 +1,7 @@
 package cn.wang.log.loginterceptors;
 
 import androidx.annotation.NonNull;
-
 import java.util.List;
-
-import cn.wang.log.config.LogConfig;
 import cn.wang.log.core.LogMsg;
 
 /**

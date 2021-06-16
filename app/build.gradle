@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 29
     buildToolsVersion "29.0.3"
 
     defaultConfig {
         applicationId "cn.wang.welog"
         minSdkVersion 16
-        targetSdkVersion 30
+        targetSdkVersion 29
         versionCode 1
         versionName "1.0"
 
@@ -32,6 +32,5 @@ dependencies {
 
     implementation project(':welog')
 
-    implementation("com.squareup.okhttp3:okhttp:3.9.0")
 
 }

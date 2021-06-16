@@ -1,30 +1,13 @@
 package cn.wang.log.loginterceptors;
 
 import android.text.TextUtils;
-import android.util.Log;
-
 import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.lang.reflect.Method;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.file.OpenOption;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.util.HashSet;
-import java.util.Set;
-
 import cn.wang.log.config.LogConfig;
 import cn.wang.log.core.LogMsg;
 import cn.wang.log.core.LogCenter;
 import cn.wang.log.exceptions.LogFileException;
-import cn.wang.log.exceptions.OpenFileException;
-import cn.wang.niolib.NioUtils;
 
 /**
  * Created to : 如果当前的日志需要输入到文件中，则写入文件。
