@@ -1,19 +1,12 @@
 package com.wang.monitor.fps.monitors;
 
-import android.os.Build;
 import android.os.Looper;
-import android.util.Log;
 import android.util.LongSparseArray;
-
 import com.wang.monitor.fps.core.FpsConstants;
-
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import androidx.annotation.RequiresApi;
 import cn.wang.log.core.WeLog;
 
 /**
- * Created to :
+ * Created to : 主线程Handler卡顿检测。
  *
  * @author WANG
  * @date 2021/6/16

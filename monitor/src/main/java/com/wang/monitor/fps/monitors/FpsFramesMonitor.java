@@ -6,7 +6,7 @@ import com.wang.monitor.fps.interfaces.FpsFrameCallback;
 import cn.wang.log.core.WeLog;
 
 /**
- * Created to :
+ * Created to : 掉帧检测。
  *
  * @author WANG
  * @date 2021/6/14

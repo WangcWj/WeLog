@@ -9,7 +9,7 @@ import java.util.Set;
 import androidx.annotation.NonNull;
 
 /**
- * Created to :
+ * Created to : 仿写HandlerThread。
  *
  * @author WANG
  * @date 2021/6/16
