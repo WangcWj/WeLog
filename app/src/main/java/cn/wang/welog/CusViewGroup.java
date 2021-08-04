@@ -5,8 +5,7 @@ import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
-import android.view.View;
-import android.widget.TextView;
+import android.widget.FrameLayout;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatTextView;
@@ -17,24 +16,24 @@ import androidx.appcompat.widget.AppCompatTextView;
  * @author cc.wang
  * @date 2021/6/4
  */
-public class CusViewTwo extends AppCompatTextView {
+public class CusViewGroup extends FrameLayout {
 
-    public CusViewTwo(Context context) {
+    public CusViewGroup(Context context) {
         super(context);
     }
 
-    public CusViewTwo(Context context, @Nullable AttributeSet attrs) {
+    public CusViewGroup(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public CusViewTwo(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public CusViewGroup(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+
     }
 
-   /* @Override
+    @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        Log.e("FrameMetrics","CusViewTwo.onMeasure.");
     }
 
     @Override
@@ -46,27 +45,54 @@ public class CusViewTwo extends AppCompatTextView {
             e.printStackTrace();
         }
         Log.e("FrameMetrics","CusViewTwo.onDraw.");
-    }*/
+    }
 
+    float targetX;
+
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        boolean interceptor = false;
+        switch (ev.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+                targetX = ev.getX();
+                break;
+            case MotionEvent.ACTION_MOVE:
+                float x = ev.getX();
+                float distance = Math.abs(x - targetX);
+                if(distance > 8){
+                    Log.e(" Wang", "CusViewGroup.onInterceptTouchEvent.拦截");
+                     interceptor = true;
+                }
+                targetX = x;
+                break;
+            case MotionEvent.ACTION_UP:
+                break;
+            default:
+                break;
+        }
+        if(interceptor) {
+            return true;
+        }else {
+            return super.onInterceptTouchEvent(ev);
+        }
+    }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
-
                 break;
             case MotionEvent.ACTION_MOVE:
-                Log.e(" Wang", "子View滑动");
                 break;
             case MotionEvent.ACTION_UP:
-                break;
-            case  MotionEvent.ACTION_CANCEL:
-                Log.e(" Wang", "子ViewACTION_CANCEL");
                 break;
             default:
                 break;
         }
+
+
         return true;
     }
 }

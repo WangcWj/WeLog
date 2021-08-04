@@ -1,4 +1,4 @@
-package com.wang.monitor.fps.utils;
+package com.wang.monitor.utils;
 
 import android.os.Build;
 import android.util.Log;

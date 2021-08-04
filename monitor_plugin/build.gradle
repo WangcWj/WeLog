@@ -1,0 +1,27 @@
+apply plugin: 'groovy'
+apply plugin: 'maven'
+
+dependencies {
+    implementation gradleApi()
+    implementation localGroovy()
+    //这里面你想用什么就去引入什么
+    implementation 'com.android.tools.build:gradle:4.0.1'
+    implementation 'com.squareup:javapoet:1.11.1'
+}
+
+
+sourceCompatibility = "1.8"
+targetCompatibility = "1.8"
+
+repositories {
+    jcenter()
+}
+
+uploadArchives {
+    repositories.mavenDeployer {
+        repository(url: uri("./src/depository"))
+        pom.groupId = 'cn.wang.monitor'
+        pom.artifactId = 'plugin'
+        pom.version = "1.0.0"
+    }
+}

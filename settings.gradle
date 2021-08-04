@@ -1,3 +1,4 @@
+include ':monitor_plugin'
 include ':monitor'
 include ':niolib'
 include ':welog'

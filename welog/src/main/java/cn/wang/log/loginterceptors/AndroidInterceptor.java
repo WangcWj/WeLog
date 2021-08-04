@@ -1,6 +1,7 @@
 package cn.wang.log.loginterceptors;
 
 import android.util.Log;
+
 import cn.wang.log.config.LogConfig;
 import cn.wang.log.core.LogMsg;
 
@@ -23,6 +24,7 @@ public class AndroidInterceptor implements WeLogInterceptor {
             }
             if (target.printMode >= 0 && (target.printMode & LogConfig.PRINT_LOGCAT) != 0) {
                 Log.println(target.level, target.tag, target.message);
+                return target;
             }
             if ((target.printMode ^ LogConfig.PRINT_LOGCAT) != 0) {
                 process = chain.process(target);

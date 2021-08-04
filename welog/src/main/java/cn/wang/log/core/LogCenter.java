@@ -2,6 +2,7 @@ package cn.wang.log.core;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -150,6 +151,7 @@ public class LogCenter {
             LogMsgPool.recycler(process);
         } catch (Exception e) {
             //处理请求过程中产生的异常。
+            Log.e(" cc.wang", "LogCenter.dispatchChain.Exception "+e);
         }
     }
 

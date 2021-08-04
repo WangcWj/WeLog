@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'we.monitor'
 
 android {
     compileSdkVersion 29
@@ -31,6 +32,8 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
     implementation 'com.github.markzhai:blockcanary-android:1.5.0'
     implementation project(':monitor')
+    implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
 
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.6.0'
 
 }

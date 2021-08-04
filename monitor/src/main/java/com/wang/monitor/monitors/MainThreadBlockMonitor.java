@@ -1,8 +1,11 @@
-package com.wang.monitor.fps.monitors;
+package com.wang.monitor.monitors;
 
 import android.os.Looper;
 import android.util.LongSparseArray;
-import com.wang.monitor.fps.core.FpsConstants;
+
+import com.wang.monitor.core.MonitorConstants;
+import com.wang.monitor.interfaces.Monitor;
+
 import cn.wang.log.core.WeLog;
 
 /**
@@ -11,37 +14,72 @@ import cn.wang.log.core.WeLog;
  * @author WANG
  * @date 2021/6/16
  */
-public class MainThreadBlockMonitor extends LooperMonitor.LooperCallback implements Runnable {
+public class MainThreadBlockMonitor extends LooperMonitor.LooperCallback implements Runnable, Monitor {
 
     private long loopStartTime = 0L;
     private IoThread ioThread;
     protected boolean sample = false;
     private int blockThreadMillis;
     private int maxStackCount;
+    private volatile boolean running = false;
     private LongSparseArray<String> stackList = new LongSparseArray<>();
 
     public MainThreadBlockMonitor(int blockThreadMillis, int maxStackCount) {
         this.blockThreadMillis = blockThreadMillis;
         this.maxStackCount = maxStackCount;
-        ioThread = new IoThread("IoThread");
+    }
+
+    @Override
+    public void monitorStart() {
+        ioThread = IoThread.getIoThread();
         ioThread.start();
+        running = true;
+        WeLog.d("MainThreadBlockMonitor start!");
+    }
+
+    @Override
+    public void monitorPause() {
+
+    }
+
+    @Override
+    public void monitorResume() {
+
+    }
+
+    @Override
+    public void monitorQuit() {
+        running = false;
+        if (null != ioThread && ioThread.isAlive()) {
+            ioThread.quite();
+        }
+        WeLog.d("MainThreadBlockMonitor quit!");
     }
 
     @Override
     public void dispatchLoopStart() {
-        loopStartTime = System.currentTimeMillis();
-        startDump();
+        if (running) {
+            loopStartTime = System.currentTimeMillis();
+            startDump();
+        }
     }
 
     @Override
     public void dispatchLoopEnd() {
-        if (loopStartTime > 0L) {
-            long end = System.currentTimeMillis() - loopStartTime;
-            if (end >= blockThreadMillis) {
-                ioThread.getIoHandler().post(printerStackRunnable);
+        if (running) {
+            if (loopStartTime > 0L) {
+                long end = System.currentTimeMillis() - loopStartTime;
+                if (end >= blockThreadMillis) {
+                    ioThread.getIoHandler().post(printerStackRunnable);
+                }
             }
+            stopDump();
         }
-        stopDump();
+    }
+
+    @Override
+    public int callbackID() {
+        return MonitorConstants.MAIN_THREAD_BLOCK_MONITOR_ID;
     }
 
     @Override
@@ -54,20 +92,18 @@ public class MainThreadBlockMonitor extends LooperMonitor.LooperCallback impleme
     }
 
     private void printStackTrace() {
-        WeLog.d("MainThreadBlockMonitor-> collectStack. collect count = "+stackList.size()+"  Thread is "+Thread.currentThread());
+        WeLog.d("MainThreadBlockMonitor-> collectStack. collect count = " + stackList.size() + "  Thread is " + Thread.currentThread());
         StringBuilder stringBuilder = new StringBuilder();
         Thread thread = Looper.getMainLooper().getThread();
         for (StackTraceElement element : thread.getStackTrace()) {
             stringBuilder.append(element.toString())
-                    .append(FpsConstants.SEPARATOR);
+                    .append(MonitorConstants.SEPARATOR);
         }
-        synchronized (stackList) {
-            //超过了最大的堆栈次数就移除最早的一条。
-            if (stackList.size() >= maxStackCount) {
-                stackList.removeAt(0);
-            }
-            stackList.put(System.currentTimeMillis(), stringBuilder.toString());
+        //超过了最大的堆栈次数就移除最早的一条。
+        if (stackList.size() >= maxStackCount) {
+            stackList.removeAt(0);
         }
+        stackList.put(System.currentTimeMillis(), stringBuilder.toString());
     }
 
     private void startDump() {

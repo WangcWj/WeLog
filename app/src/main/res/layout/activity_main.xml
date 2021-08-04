@@ -2,24 +2,23 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/root"
     android:background="@android:color/white"
     tools:context=".MainActivity">
 
-    <Button
-        android:id="@+id/block"
-        android:text="bock"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
 
-    <cn.wang.welog.CusViewTwo
-        android:id="@+id/cus"
-        android:background="@android:color/darker_gray"
-        android:visibility="gone"
+    <cn.wang.welog.CusViewGroup
+        android:background="@color/colorPrimary"
         android:layout_width="match_parent"
-        android:layout_height="200dp" />
+        android:layout_height="200dp">
 
+        <Button
+            android:id="@+id/block"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="bock" />
+    </cn.wang.welog.CusViewGroup>
 
 </FrameLayout>

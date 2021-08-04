@@ -1,4 +1,4 @@
-package com.wang.monitor.fps.monitors;
+package com.wang.monitor.monitors;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -14,14 +14,23 @@ import androidx.annotation.NonNull;
  * @author WANG
  * @date 2021/6/16
  */
-class IoThread extends Thread {
+public class IoThread extends Thread {
 
     private Handler mIoHandler;
     Looper mIoLooper;
     private Set<Runnable> mTask = new HashSet<>(5);
 
-    public IoThread(@NonNull String name) {
+    private IoThread(@NonNull String name) {
         super(name);
+    }
+
+    private static ThreadLocal<IoThread> ioThreadThreadLocal = new ThreadLocal<>();
+
+    public static IoThread getIoThread() {
+        if (ioThreadThreadLocal.get() == null) {
+            ioThreadThreadLocal.set(new IoThread("IoThread"));
+        }
+        return ioThreadThreadLocal.get();
     }
 
     @Override
@@ -75,10 +84,14 @@ class IoThread extends Thread {
         return mIoHandler;
     }
 
+    /**
+     * 立马终止，不需要处理消息队列中的消息。
+     */
     public void quite() {
         Looper ioLooper = getIoLooper();
         if (null != ioLooper) {
             ioLooper.quit();
         }
+        ioThreadThreadLocal.remove();
     }
 }

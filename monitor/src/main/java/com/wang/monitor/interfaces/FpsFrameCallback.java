@@ -1,4 +1,4 @@
-package com.wang.monitor.fps.interfaces;
+package com.wang.monitor.interfaces;
 
 /**
  * Created to :

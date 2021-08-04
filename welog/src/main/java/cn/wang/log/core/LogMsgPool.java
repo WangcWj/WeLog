@@ -11,7 +11,7 @@ import cn.wang.log.config.LogConfig;
 public class LogMsgPool {
 
     public static final Object lock = new Object();
-    private static final int MAX_POOL_SIZE = 5;
+    private static final int MAX_POOL_SIZE = 10;
     private static LogMsg mPool;
     private static int mPoolSize = 0;
 
